@@ -4,8 +4,27 @@ export const Container = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: center;
-
   margin-top: 50px;
+
+  /* Na meia tela não deixa o elemento cortado */
+  &:first-child {
+    /* margin-left: 110px; */
+  }
+`;
+
+export const Tela = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+
+  button {
+    background: #fff;
+    border: 0;
+
+    &:hover {
+      opacity: 0.6;
+    }
+  }
 `;
 
 export const Repository = styled.div`
@@ -18,7 +37,7 @@ export const Repository = styled.div`
   flex-direction: column;
 
   header {
-    padding: 30px;
+    padding: 0 30px 30px 30px;
     display: flex;
     flex-direction: column;
     align-items: center;

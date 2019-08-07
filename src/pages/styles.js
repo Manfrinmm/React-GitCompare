@@ -41,3 +41,7 @@ export const Form = styled.form`
     }
   }
 `;
+
+export const List = styled.div`
+  display: flex;
+`;

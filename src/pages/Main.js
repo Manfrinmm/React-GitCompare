@@ -3,14 +3,14 @@ import moment from "moment";
 import CampareList from "../components/CompareList";
 
 import logo from "../assets/logo.png";
-import { Container, Form } from "./styles";
+import { Container, Form, List } from "./styles";
 
 import api from "../config/api";
 
 export default class Main extends Component {
   state = {
     repoInput: "",
-    repos: [],
+    repos: JSON.parse(localStorage.getItem("@GitCompare:repos")) || [],
     loading: false,
     error: false
   };
@@ -19,7 +19,7 @@ export default class Main extends Component {
     e.preventDefault();
 
     try {
-      const { repos, repoInput, loading } = this.state;
+      const { repos, repoInput } = this.state;
 
       this.setState({ loading: true });
 
@@ -33,14 +33,46 @@ export default class Main extends Component {
         loading: false,
         error: false
       });
-      // console.log(repos);
     } catch (error) {
       this.setState({
         loading: false,
         error: true
       });
-      console.log(error);
     }
+  };
+
+  componentDidUpdate(_, prevState) {
+    const { repos } = this.state;
+    if (prevState.repos !== repos) {
+      localStorage.setItem("@GitCompare:repos", JSON.stringify(repos));
+    }
+  }
+  handleRemove = id => {
+    const { repos } = this.state;
+
+    const data = repos.filter(repo => {
+      if (repo.id !== id) return repo;
+    });
+    this.setState({ repos: data });
+  };
+
+  handleUpdate = async name => {
+    const { repos } = this.state;
+
+    this.setState({ loading: true });
+
+    const { data } = await api.get(`/repos/${name}`);
+
+    data.lastCommit = moment(data.pushed_at).fromNow();
+
+    const repositories = repos.map(repo => {
+      if (repo.id === data.id) return data;
+      else return repo;
+    });
+    this.setState({
+      repos: repositories,
+      loading: false
+    });
   };
 
   render() {
@@ -60,7 +92,19 @@ export default class Main extends Component {
             {loading ? <i className="fa fa-spinner fa-pulse" /> : "OK"}
           </button>
         </Form>
-        <CampareList repos={repos} />
+        <List>
+          {repos.map(repo => (
+            <CampareList
+              repo={repo}
+              onDelete={() => {
+                this.handleRemove(repo.id);
+              }}
+              onUpdate={() => {
+                this.handleUpdate(repo.full_name);
+              }}
+            />
+          ))}
+        </List>
       </Container>
     );
   }
